@@ -21,7 +21,7 @@ second string in the First string.
   @ DATA SECTION
   .data
 	STRING:  .asciiz "CS66206679"
-	SUBSTR:  .asciiz "667"
+	SUBSTR:  .asciiz "66"
 	
   @ TEXT section
   .text
@@ -32,7 +32,8 @@ _main:
 
     LDR R0, =STRING
     MOV R1, #0    
-STRLEN_LOOP:
+
+STRLEN_LOOP:                ; Calculate string length
     LDRB R2, [R0], #1
     CMP R2,#0
     BEQ EXIT_STRLEN 
@@ -43,43 +44,41 @@ EXIT_STRLEN:
     LDR R0, =SUBSTR
     MOV R3, #0    
 
-SUB_STRLEN_LOOP:
+SUB_STRLEN_LOOP:            ; Calculate substring length
     LDRB R2, [R0], #1
     CMP R2,#0
     BEQ EXIT_SUB_STRLEN 
     ADD R3, R3, #1
     B SUB_STRLEN_LOOP
-; 1 and 3 hold length
-
 
 EXIT_SUB_STRLEN:
     LDR R0, =STRING
     MOV R6, #0
 
-OUTER_MATCH:
+OUTER_MATCH:                      ; loop through string and if first char of substring matches any of the char in string, compare remaining characters
             LDR R2, =SUBSTR
-            LDRB R5, [R2], #0
+            LDRB R5, [R2], #0     ; read first char of substring without incrementing index
             ADD R6, R6, #1
-            MOV R1, R0
-            LDRB R4, [R0], #1
-            CMP R4, #0
-            BEQ EXIT
-            CMP R4, R5 
-            BEQ INNER_MATCH
-            B OUTER_MATCH
+            MOV R1, R0            ; store current index of string being compared, if match found start comparing from here
+            LDRB R4, [R0], #1     ; iterate through string
+            CMP R4, #0            ; check if end of string is reached
+            BEQ EXIT              ; if so exit 
+            CMP R4, R5            ; else compare if first character of substring matches here 
+            BEQ INNER_MATCH       ; jump to check complete substring match
+            B OUTER_MATCH         ; check for next position where substring may match
 
 INNER_MATCH:
-            LDRB R4, [R1], #1
-            LDRB R5, [R2], #1
-            CMP R4, R5
-            BEQ INNER_MATCH
-            CMP R5, #0
-            BEQ UPDATE_PRESENT
-            B OUTER_MATCH
+            LDRB R4, [R1], #1     ; current character in string, where substring first char is matched
+            LDRB R5, [R2], #1     ; start of substring 
+            CMP R4, R5            ; compare iteratively 
+            BEQ INNER_MATCH       ; if match , go for next characters
+            CMP R5, #0            ; if end of substring reached means whole substring is present
+            BEQ UPDATE_PRESENT  
+            B OUTER_MATCH         ; if end of substring is not reached, and character is not matching jump to see next match in string
 
 
 UPDATE_PRESENT:
-              LDR R8, =PRESENT
+              LDR R8, =PRESENT    ; update present where match is found
               STR R6, [R8]
 
 EXIT:

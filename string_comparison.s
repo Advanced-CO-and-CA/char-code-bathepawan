@@ -22,8 +22,8 @@ variable; otherwise set the variable to all ones ***(0xFFFFFFFF)***.
   @ DATA SECTION
       .data
 	LENGTH: .word 6
-	START1:  .ascii "ABCDEF"
-	START2:  .ascii "ABCDEG"
+	START1:  .ascii "ABCDGE"
+	START2:  .ascii "ABCDGH"
 	
   @ TEXT section
       .text
@@ -44,14 +44,18 @@ LOOP:
     LDRB R6, [R1], #1  
     SUB R4, R4, #1     
     CMP R5, R6        ; compare characters
-    BGT LOOP          ; if R5 is greater , just che
-    CMP R6, R5
-	BGT S2GREATER  
-    B LOOP
+    BGT S1GREATER     ; if R5 is greater , clear greater variable and exit
+    CMP R6, R5        
+	  BGT S2GREATER     ;if R6 is greater, set greater variable and exit
+    B LOOP            ;both characters are equal continue to next character
 
 S2GREATER:
 	MOV R8, #0xFFFFFFFF
 	B EXIT
+
+S1GREATER:
+  MOV R8, #0x00000000
+  B EXIT
 
  EXIT:
     LDR R7, =GREATER
